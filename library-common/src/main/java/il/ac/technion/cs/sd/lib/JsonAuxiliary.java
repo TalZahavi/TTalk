@@ -15,7 +15,7 @@ public class JsonAuxiliary {
 	}
 	
 	/**
-	 * Get a message wrapper data and return a corresponding JSON string format
+	 * Get a message wrapper data and return a corresponding string in a JSON format
 	 * @param msgWrapper The messageWrapper to transfer to JSON
 	 * @return A JSON string representing the message wrapper
 	 */
@@ -29,7 +29,7 @@ public class JsonAuxiliary {
 	}
 	
 	/**
-	 * Get a JSON string format and return a corresponding messageWrapper object
+	 * Get a string in JSON format and return a corresponding messageWrapper object
 	 * @param jsonString The JSON string to transfer to a messageWrapper object
 	 * @return A messageWrapper object representing the JSON string
 	 * @throws ParseException In case there's a problem with the parsing of the JSON string

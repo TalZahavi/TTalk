@@ -9,9 +9,9 @@ import il.ac.technion.cs.sd.msg.MessengerException;
 import il.ac.technion.cs.sd.msg.MessengerFactory;
 
 /**
- * Represent a single client.
+ * Represent a single client who is registered to a specific server.
  * <br>
- * TODO: complete function.
+ * The client can request the server for data (using a message that will be send to the server).
  */
 public class Client {
 	private String m_serverAddress;
@@ -21,8 +21,6 @@ public class Client {
 	/**
 	 * Construct a new client.
 	 * The client have a unique address and will register to a specific server.
-	 * <br>
-	 * Each client have a method for handling incoming messages from the server.
 	 * @param address The address of the client
 	 * @param serverAddress The address of the server
 	 * @throws MessengerException In case there's a problem to initialize the client messenger
@@ -68,14 +66,15 @@ public class Client {
 	 * got back from the server in response.
 	 * <br>
 	 * If there's no data to return from the server for that type of message - return null 
-	 * @param toAddress
-	 * @param data
-	 * @param type
-	 * @return
-	 * @throws MessengerException
-	 * @throws InterruptedException 
+	 * @param toAddress 
+	 * @param data The message data
+	 * @param type The message type
+	 * @return The respond from the server (In case there's none - return null)
+	 * @throws MessengerException In case there's a problem sending the server the message
+	 * @throws InterruptedException In case the client got interrupted in the process
 	 */
-	public String sendMessageWithResult(String toAddress, String data, int type) throws MessengerException, InterruptedException {
+	public String sendMessageWithResult(String toAddress, String data, int type)
+			throws MessengerException, InterruptedException {
 		MessageWrapper msgWrap = new MessageWrapper(m_client.getAddress(),toAddress, data, type);
 		
 		JsonAuxiliary json = new JsonAuxiliary();
