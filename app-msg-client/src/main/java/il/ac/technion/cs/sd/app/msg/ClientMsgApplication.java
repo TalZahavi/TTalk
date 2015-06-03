@@ -66,7 +66,7 @@ public class ClientMsgApplication {
 	 */
 	public void sendMessage(String target, String what) {
 		try {
-	        m_client.sendMessageWithResult(target, what, 0);
+	        m_client.sendMessage(target, what, 0);
         } catch (MessengerException | InterruptedException e) {
 	        // TODO Auto-generated catch block
 	        e.printStackTrace();
@@ -102,7 +102,12 @@ public class ClientMsgApplication {
      * You can assume that a stopped client won't be restarted using {@link ClientMsgApplication#login(Consumer, Function, BiConsumer)}
      */
     public void stop() {
-            throw new UnsupportedOperationException("Not implemented");
+        try {
+	        m_client.stopClient();
+        } catch (MessengerException e) {
+	        // TODO Auto-generated catch block
+	        e.printStackTrace();
+        }
     }
 
 }

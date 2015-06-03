@@ -9,67 +9,91 @@ import il.ac.technion.cs.sd.msg.MessengerException;
 import il.ac.technion.cs.sd.msg.MessengerFactory;
 
 /**
- * Each client can register to the server.
- * <br>
- * The server will get the clients requests messages and send back the corresponding result.
- * <br>
- * The server is an abstract class - In order to use it the user have to implement
- * the handleMessage method.
+ * Each client can register to the server. <br>
+ * The server will get the clients requests messages and send back the corresponding result. <br>
+ * The server is an abstract class - In order to use it the user have to implement the handleMessage method.
  */
 public abstract class Server {
-
 	private String m_address;
 	private Messenger m_server;
 	private BlockingQueue<String> serverIncomingMessages;
 	
-	public Server(String serverAddress)
-			throws MessengerException {
+	public Server(String serverAddress) throws MessengerException {
 		m_address = serverAddress;
 		serverIncomingMessages = new LinkedBlockingQueue<>();
-		
-		m_server = new MessengerFactory().start(serverAddress, (m,x) -> {
+		m_server = new MessengerFactory().start(serverAddress, (m, x) -> {
 			try {
-			if (x.equals("")) {
-				serverIncomingMessages.put(x);
-			}
-			else { //We got a request message from the users
-
-				MessageWrapper msgWrap = null;
-				
-					msgWrap = JsonAuxiliary.jsonToMessageWrapper(x);
-				
-					String senderAddress = msgWrap.getFromAddress();
+				System.out.println("Server received: " + x);
+				if (x.equals(""))
+					serverIncomingMessages.put(x);
+				else {
+					MessageWrapper msg = JsonAuxiliary.jsonToMessageWrapper(x);
+					System.out.println("Server sending ACK to client " + msg.getFromAddress());
+					m.send(msg.getFromAddress(), "");
+//					if (!msg.getToAddress().equals(getAddress()))
+//						forwardMessage(msg);
+					MessageWrapper sendBack = handleMessage(msg);
+					if (sendBack != null) {
+						do {
+							m.send(msg.getFromAddress(), JsonAuxiliary.messageWrapperToJson(sendBack));
+						} while (m.getNextMessage(100) == null);
+					}
 					
-					m.send(senderAddress, "");
-				
-					String sendBack = handleMessage(msgWrap);
-					do {
-						m.send(senderAddress, sendBack);
-					}
-					while(m.getNextMessage(100)==null);
-				
-					}
+					
+				}
+			} catch (Exception e) {
+				throw new IllegalStateException(e);
 			}
-				catch (Exception e) {
-					throw new IllegalStateException(e);
-		}});
+		});
 	}
 	
-	
 	/**
-	 * Sent a message from the server to a client
-	 * @param to The address to send the message
-	 * @param data The data of the message
-	 * @param type The type of the message
-	 * @throws MessengerException If there's a problem sending a message to the client
+	 * Send the client a messageWrapper object. <br>
+	 * In this case, the message in not an answer to a request of the client. The server is the one who decide the send the message
+	 * first.
+	 * 
+	 * @param fromAddress
+	 *            In case the message is originally from some other client (and not the server)
+	 * @param toAddress
+	 *            The address of the client to send the message to
+	 * @param data
+	 *            The data of the message
+	 * @param type
+	 *            The type of the message
+	 * @throws MessengerException
+	 *             In case there's a problem sending the client the message
 	 */
-	public void send(String to, String data, int type) throws MessengerException {
-		m_server.send(to, JsonAuxiliary.messageWrapperToJson(new MessageWrapper(getAddress(), to, data, type)));
+	public void sendMessage(String toAddress, String data, int type) throws MessengerException {
+		MessageWrapper msgWrap = new MessageWrapper(getAddress(), toAddress, data, type);
+		String jsonMsg = JsonAuxiliary.messageWrapperToJson(msgWrap);
+		String ack = null;
+		while (ack == null) {
+			m_server.send(toAddress, jsonMsg);
+			try {
+				ack = serverIncomingMessages.poll(200, TimeUnit.MILLISECONDS);
+			} catch (InterruptedException e) {
+				throw new MessengerException(e.getMessage());
+			}
+		}
+	}
+	
+	public void forwardMessage(MessageWrapper msgWrap) throws MessengerException {
+		String ack = null;
+		while (ack == null) {
+			m_server.send(msgWrap.getToAddress(), JsonAuxiliary.messageWrapperToJson(msgWrap));
+			try {
+				ack = serverIncomingMessages.poll(100, TimeUnit.MILLISECONDS);
+			} catch (InterruptedException e) {
+				throw new MessengerException(e.getMessage());
+			}
+		}
 	}
 	
 	/**
 	 * Shut down the server.
-	 * @throws MessengerException In case there's a problem to killing the server messenger
+	 * 
+	 * @throws MessengerException
+	 *             In case there's a problem to killing the server messenger
 	 */
 	public void stopServer() throws MessengerException {
 		m_server.kill();
@@ -83,40 +107,11 @@ public abstract class Server {
 	}
 	
 	/**
-	 * Send the client a messageWrapper object.
-	 * <br>
-	 * In this case, the message in not an answer to a request of the client.
-	 * The server is the one who decide the send the message first.
-	 * @param fromAddress In case the message is originally from some other client (and not the server)
-	 * @param toAddress The address of the client to send the message to
-	 * @param data The data of the message
-	 * @param type The type of the message
-	 * @throws MessengerException In case there's a problem sending the client the message
-	 */
-	public void sendMessageToClient(String fromAddress,String toAddress, String data, int type) throws MessengerException {
-		MessageWrapper msgWrap = new MessageWrapper(fromAddress, toAddress, data, type);
-		
-		JsonAuxiliary json = new JsonAuxiliary();
-		String jsonMsg = json.messageWrapperToJson(msgWrap);
-		
-		String ack = null;
-		while (ack == null) {
-			m_server.send(toAddress, jsonMsg);
-			try {
-				ack = serverIncomingMessages.poll(100, TimeUnit.MILLISECONDS);
-			} catch (InterruptedException e) {
-				throw new MessengerException(e.getMessage());
-			}
-		}
-	}
-	
-	/**
-	 * An abstract class for handling messages.
-	 * <br>
+	 * An abstract class for handling messages. <br>
 	 * In this method you should implement how the server handle each message type.
+	 * 
 	 * @param msgWrapper
 	 * @return
 	 */
-	public abstract  String handleMessage(MessageWrapper msgWrapper) throws MessengerException;
-	
+	public abstract MessageWrapper handleMessage(MessageWrapper msgWrapper) throws MessengerException;
 }

@@ -39,7 +39,7 @@ public class ServerMailApplication {
 	 * This should be a <b>non-blocking</b> call.
 	 */
 	public void start() {
-		throw new UnsupportedOperationException("Not implemented");
+		m_server.start();
 	}
 	
 	/**
@@ -59,6 +59,6 @@ public class ServerMailApplication {
 	 * run on a new, clean server. you may assume the server is stopped before this method is called.
 	 */
 	public void clean() {
-		throw new UnsupportedOperationException("Not implemented");
+		m_server.clean();
 	}
 }
