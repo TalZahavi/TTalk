@@ -22,10 +22,9 @@ public abstract class Server {
 		m_address = serverAddress;
 		
 		m_server = new MessengerFactory().start(serverAddress, (m,x) -> {
-			JsonAuxiliary json = new JsonAuxiliary();
 			MessageWrapper msgWrap = null;
 			try {
-				msgWrap = json.jsonToMessageWrapper(x);
+				msgWrap = JsonAuxiliary.jsonToMessageWrapper(x);
 			
 				String senderAddress = msgWrap.getFromAddress();
 				
@@ -44,6 +43,18 @@ public abstract class Server {
 				catch (Exception e) {
 					throw new IllegalStateException(e);
 		}});
+	}
+	
+	
+	/**
+	 * Sent a message from the server to a client
+	 * @param to The address to send the message
+	 * @param data The data of the message
+	 * @param type The type of the message
+	 * @throws MessengerException If there's a problem sending a message to the client
+	 */
+	public void send(String to, String data, int type) throws MessengerException {
+		m_server.send(to, JsonAuxiliary.messageWrapperToJson(new MessageWrapper(getAddress(), to, data, type)));
 	}
 	
 	/**
@@ -68,6 +79,6 @@ public abstract class Server {
 	 * @param msgWrapper
 	 * @return
 	 */
-	public abstract  String handleMessage(MessageWrapper msgWrapper);
+	public abstract  String handleMessage(MessageWrapper msgWrapper) throws MessengerException;
 	
 }

@@ -41,7 +41,7 @@ public class MessageWrapper {
 	/**
 	 * @return The data of the message (the actual message)
 	 */
-	public String getMeesageData() {
+	public String getMessageData() {
 		return m_msgData;
 	}
 	

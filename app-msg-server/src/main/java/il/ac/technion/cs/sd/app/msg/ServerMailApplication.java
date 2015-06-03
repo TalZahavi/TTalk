@@ -1,11 +1,15 @@
 package il.ac.technion.cs.sd.app.msg;
 
+import il.ac.technion.cs.sd.msg.MessengerException;
+
 
 /**
  * The server side of the TMail application. <br>
  * This class is mainly used in our tests to start, stop, and clean the server
  */
 public class ServerMailApplication {
+	
+	TTalkServer m_server;
 	
     /**
      * Starts a new mail server. Servers with the same name retain all their information until
@@ -15,14 +19,19 @@ public class ServerMailApplication {
      */
 
 	public ServerMailApplication(String string) {
-		throw new UnsupportedOperationException("Not implemented");
+		try {
+	        m_server = new TTalkServer(string);
+        } catch (MessengerException e) {
+	        // TODO Auto-generated catch block
+	        e.printStackTrace();
+        }
 	}
 	
 	/**
 	 * @return the server's address; this address will be used by clients connecting to the server
 	 */
 	public String getAddress() {
-		throw new UnsupportedOperationException("Not implemented");
+		return m_server.getAddress();
 	}
 	
 	/**
@@ -37,7 +46,12 @@ public class ServerMailApplication {
 	 * Stops the server. A stopped server can't accept messages, but doesn't delete any data (messages that weren't received).
 	 */
 	public void stop() {
-		throw new UnsupportedOperationException("Not implemented");
+		try {
+	        m_server.stopServer();
+        } catch (MessengerException e) {
+	        // TODO Auto-generated catch block
+	        e.printStackTrace();
+        }
 	}
 	
 	/**

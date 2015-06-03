@@ -8,11 +8,6 @@ import org.json.simple.parser.ParseException;
  * An auxiliary class to transfer the messageWrapper class from\to a JSON string
  */
 public class JsonAuxiliary {
-	private JSONObject m_jsonObject;
-	
-	public JsonAuxiliary() {
-		m_jsonObject = new JSONObject();
-	}
 	
 	/**
 	 * Get a message wrapper data and return a corresponding string in a JSON format
@@ -20,12 +15,13 @@ public class JsonAuxiliary {
 	 * @return A JSON string representing the message wrapper
 	 */
 	@SuppressWarnings("unchecked")
-	public String messageWrapperToJson(MessageWrapper msgWrapper) {
-		m_jsonObject.put("fromAddress", msgWrapper.getFromAddress());
-		m_jsonObject.put("toAddress", msgWrapper.getToAddress());
-		m_jsonObject.put("msgData", msgWrapper.getMeesageData());
-		m_jsonObject.put("msgType", new Integer(msgWrapper.getMessageType()));
-		return m_jsonObject.toJSONString();
+	public static String messageWrapperToJson(MessageWrapper msgWrapper) {
+		JSONObject $ = new JSONObject();
+		$.put("fromAddress", msgWrapper.getFromAddress());
+		$.put("toAddress", msgWrapper.getToAddress());
+		$.put("msgData", msgWrapper.getMessageData());
+		$.put("msgType", new Integer(msgWrapper.getMessageType()));
+		return $.toJSONString();
 	}
 	
 	/**
@@ -34,7 +30,7 @@ public class JsonAuxiliary {
 	 * @return A messageWrapper object representing the JSON string
 	 * @throws ParseException In case there's a problem with the parsing of the JSON string
 	 */
-	public MessageWrapper jsonToMessageWrapper(String jsonString) throws ParseException {	
+	public static MessageWrapper jsonToMessageWrapper(String jsonString) throws ParseException {	
 		  Object obj=JSONValue.parse(jsonString);
 		  JSONObject jsonObject = (JSONObject) obj;
 		  String fromAdr = (String) jsonObject.get("fromAddress");

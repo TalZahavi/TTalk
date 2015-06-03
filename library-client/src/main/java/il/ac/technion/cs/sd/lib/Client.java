@@ -13,7 +13,7 @@ import il.ac.technion.cs.sd.msg.MessengerFactory;
  * <br>
  * The client can request the server for data (using a message that will be send to the server).
  */
-public class Client {
+public abstract class Client {
 	private String m_serverAddress;
 	private Messenger m_client;
 	private BlockingQueue<String> clientIncomingMessages;
@@ -77,8 +77,7 @@ public class Client {
 			throws MessengerException, InterruptedException {
 		MessageWrapper msgWrap = new MessageWrapper(m_client.getAddress(),toAddress, data, type);
 		
-		JsonAuxiliary json = new JsonAuxiliary();
-		String jsonMsg = json.messageWrapperToJson(msgWrap);
+		String jsonMsg = JsonAuxiliary.messageWrapperToJson(msgWrap);
 		
 		String ack = null;
 		while (ack == null) {
@@ -93,6 +92,5 @@ public class Client {
 		String resultData = clientIncomingMessages.take();
 		
 		return resultData;
-	}
-
+	}	
 }

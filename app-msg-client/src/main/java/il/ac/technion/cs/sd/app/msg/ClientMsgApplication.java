@@ -1,5 +1,7 @@
 package il.ac.technion.cs.sd.app.msg;
 
+import il.ac.technion.cs.sd.msg.MessengerException;
+
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -11,6 +13,8 @@ import java.util.function.Function;
  */
 public class ClientMsgApplication {
 	
+	TTalkClient m_client;
+	
 	/**
 	 * Creates a new application, tied to a single user
 	 * 
@@ -18,7 +22,12 @@ public class ClientMsgApplication {
 	 * @param username The username that will be sending and accepting the messages using this object
 	 */
 	public ClientMsgApplication(String serverAddress, String username) {
-		throw new UnsupportedOperationException("Not implemented");
+		try {
+	        m_client = new TTalkClient(username, serverAddress);
+        } catch (MessengerException e) {
+	        // TODO Auto-generated catch block
+	        e.printStackTrace();
+        }
 	}
 	
 	/**
@@ -35,7 +44,10 @@ public class ClientMsgApplication {
 	public void login(Consumer<InstantMessage> messageConsumer,
 			Function<String, Boolean> friendshipRequestHandler,
 			BiConsumer<String, Boolean> friendshipReplyConsumer) {
-		throw new UnsupportedOperationException("Not implemented");
+		m_client.setMessageConsumer(x -> messageConsumer.accept(new InstantMessage(x.getFromAddress(), x.getToAddress(), x.getMessageData())));
+		m_client.setFriendshipRequestHandler(friendshipRequestHandler);
+		m_client.setFriendshipReplyConsumer(friendshipReplyConsumer);
+		m_client.login();
 	}
 	
 	/**
@@ -43,7 +55,7 @@ public class ClientMsgApplication {
 	 * messages. A client can login (using {@link ClientMsgApplication#login(Consumer, Function, BiConsumer)} after logging out.
 	 */
 	public void logout() {
-		throw new UnsupportedOperationException("Not implemented");
+		m_client.logout();
 	}
 	
 	/**
@@ -53,7 +65,12 @@ public class ClientMsgApplication {
 	 * @param what The message to send
 	 */
 	public void sendMessage(String target, String what) {
-		throw new UnsupportedOperationException("Not implemented");
+		try {
+	        m_client.sendMessageWithResult(target, what, 0);
+        } catch (MessengerException | InterruptedException e) {
+	        // TODO Auto-generated catch block
+	        e.printStackTrace();
+        }
 	}
 	
 	/**
@@ -65,7 +82,7 @@ public class ClientMsgApplication {
 	 * @param who The recipient of the friend request.
 	 */
 	public void requestFriendship(String who) {
-		throw new UnsupportedOperationException("Not implemented");
+		m_client.requestFriendship(who);
 	}
 	
 	/**
@@ -76,7 +93,7 @@ public class ClientMsgApplication {
 	 *         user is a friend and is offline; an empty {@link Optional} if the user isn't a friend of the client
 	 */
 	public Optional<Boolean> isOnline(String who) {
-		throw new UnsupportedOperationException("Not implemented");
+		return m_client.isOnline(who);
 	}
 	
     /**
