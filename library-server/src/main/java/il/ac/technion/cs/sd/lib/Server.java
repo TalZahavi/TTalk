@@ -1,5 +1,9 @@
 package il.ac.technion.cs.sd.lib;
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+
 import il.ac.technion.cs.sd.msg.Messenger;
 import il.ac.technion.cs.sd.msg.MessengerException;
 import il.ac.technion.cs.sd.msg.MessengerFactory;
@@ -16,30 +20,36 @@ public abstract class Server {
 
 	private String m_address;
 	private Messenger m_server;
+	private BlockingQueue<String> serverIncomingMessages;
 	
 	public Server(String serverAddress)
 			throws MessengerException {
 		m_address = serverAddress;
+		serverIncomingMessages = new LinkedBlockingQueue<>();
 		
 		m_server = new MessengerFactory().start(serverAddress, (m,x) -> {
-			MessageWrapper msgWrap = null;
 			try {
-				msgWrap = JsonAuxiliary.jsonToMessageWrapper(x);
-			
-				String senderAddress = msgWrap.getFromAddress();
+			if (x.equals("")) {
+				serverIncomingMessages.put(x);
+			}
+			else { //We got a request message from the users
+
+				MessageWrapper msgWrap = null;
 				
-				if (!x.equals(""))
+					msgWrap = JsonAuxiliary.jsonToMessageWrapper(x);
+				
+					String senderAddress = msgWrap.getFromAddress();
+					
 					m.send(senderAddress, "");
-			
-				String sendBack = handleMessage(msgWrap);
 				
-			
-				do {
-					m.send(senderAddress, sendBack);
-				}
-				while(m.getNextMessage(100)==null);
-			
-				}
+					String sendBack = handleMessage(msgWrap);
+					do {
+						m.send(senderAddress, sendBack);
+					}
+					while(m.getNextMessage(100)==null);
+				
+					}
+			}
 				catch (Exception e) {
 					throw new IllegalStateException(e);
 		}});
@@ -70,6 +80,34 @@ public abstract class Server {
 	 */
 	public String getAddress() {
 		return m_address;
+	}
+	
+	/**
+	 * Send the client a messageWrapper object.
+	 * <br>
+	 * In this case, the message in not an answer to a request of the client.
+	 * The server is the one who decide the send the message first.
+	 * @param fromAddress In case the message is originally from some other client (and not the server)
+	 * @param toAddress The address of the client to send the message to
+	 * @param data The data of the message
+	 * @param type The type of the message
+	 * @throws MessengerException In case there's a problem sending the client the message
+	 */
+	public void sendMessageToClient(String fromAddress,String toAddress, String data, int type) throws MessengerException {
+		MessageWrapper msgWrap = new MessageWrapper(fromAddress, toAddress, data, type);
+		
+		JsonAuxiliary json = new JsonAuxiliary();
+		String jsonMsg = json.messageWrapperToJson(msgWrap);
+		
+		String ack = null;
+		while (ack == null) {
+			m_server.send(toAddress, jsonMsg);
+			try {
+				ack = serverIncomingMessages.poll(100, TimeUnit.MILLISECONDS);
+			} catch (InterruptedException e) {
+				throw new MessengerException(e.getMessage());
+			}
+		}
 	}
 	
 	/**
