@@ -12,7 +12,8 @@ public enum TTalkMessageType {
 	FRIEND_REQUEST_ACCEPT(3),
 	FRIEND_REQUEST_DECLINE(4),
 	LOGOUT(5),
-	IS_ONLINE(6);
+	IS_ONLINE(6),
+	RETREIVE(7);
 
    private final int value;
 	

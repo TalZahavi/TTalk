@@ -38,6 +38,7 @@ public class TMsgTest {
 		gal.sendMessage("Itay", "Hi");
 		ClientMsgApplication itay = buildClient("Itay");
 		itay.login(x -> messages.add(x), x -> true, (x, y) -> {});
+		System.out.println("***Itay LOGGED IN***");
 		assertEquals(messages.take(), new InstantMessage("Gal", "Itay", "Hi")); // Itay received the message as soon as he logged in
 		gal.requestFriendship("Itay");
 		assertEquals(true, friendshipReplies.take()); // itay auto replies yes

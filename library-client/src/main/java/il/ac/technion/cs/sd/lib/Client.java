@@ -42,7 +42,15 @@ public abstract class Client {
 				else {
 					System.out.println("Client " + m_client.getAddress() + " sending ACK to server");
 					m.send(m_serverAddress, "");
-					handleMessage(JsonAuxiliary.jsonToMessageWrapper(x));
+					
+					MessageWrapper sendBack = handleMessage(JsonAuxiliary.jsonToMessageWrapper(x));
+					if (sendBack != null) {
+						System.out.println("Client " + m_client.getAddress() + " received: " + (sendBack.equals("") ? "ACK" : sendBack));
+						
+						do {
+							m.send(sendBack.getToAddress(), JsonAuxiliary.messageWrapperToJson(sendBack));
+						} while (m.getNextMessage(100) == null);
+					}
 				}
 			} catch (Exception e) {
 				throw new IllegalStateException(e);
@@ -101,7 +109,7 @@ public abstract class Client {
 				throw new MessengerException(e.getMessage());
 			}
 			
-			//System.out.println("ack is: " + ack);
+			System.out.println("ack is: " + ack);
 			
 		}
 	}
@@ -129,5 +137,5 @@ public abstract class Client {
 	 * @param msgWrapper
 	 * @return Whether 
 	 */
-	public abstract void handleMessage(MessageWrapper msgWrapper) throws MessengerException;
+	public abstract MessageWrapper handleMessage(MessageWrapper msgWrapper) throws MessengerException;
 }

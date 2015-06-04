@@ -1,5 +1,9 @@
 package il.ac.technion.cs.sd.app.msg;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import il.ac.technion.cs.sd.msg.MessengerException;
 
 
@@ -39,7 +43,12 @@ public class ServerMailApplication {
 	 * This should be a <b>non-blocking</b> call.
 	 */
 	public void start() {
-		m_server.start();
+		try {
+	        m_server.start();
+        } catch (MessengerException e) {
+	        // TODO Auto-generated catch block
+	        e.printStackTrace();
+        }
 	}
 	
 	/**
@@ -47,7 +56,7 @@ public class ServerMailApplication {
 	 */
 	public void stop() {
 		try {
-	        m_server.stopServer();
+	        m_server.kill();
         } catch (MessengerException e) {
 	        // TODO Auto-generated catch block
 	        e.printStackTrace();
@@ -59,6 +68,11 @@ public class ServerMailApplication {
 	 * run on a new, clean server. you may assume the server is stopped before this method is called.
 	 */
 	public void clean() {
-		m_server.clean();
+		try {
+			Files.deleteIfExists(Paths.get("..\\app-msg-server\\src\\main\\resources\\" + m_server.getAddress() + "_fl"));
+			Files.deleteIfExists(Paths.get("..\\app-msg-server\\src\\main\\resources\\" + m_server.getAddress() + "_om"));
+        } catch (IOException e) {
+        	throw new RuntimeException();
+        }
 	}
 }

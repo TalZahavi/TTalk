@@ -21,30 +21,7 @@ public abstract class Server {
 	public Server(String serverAddress) throws MessengerException {
 		m_address = serverAddress;
 		serverIncomingMessages = new LinkedBlockingQueue<>();
-		m_server = new MessengerFactory().start(serverAddress, (m, x) -> {
-			try {
-				System.out.println("Server received: " + x);
-				if (x.equals(""))
-					serverIncomingMessages.put(x);
-				else {
-					MessageWrapper msg = JsonAuxiliary.jsonToMessageWrapper(x);
-					System.out.println("Server sending ACK to client " + msg.getFromAddress());
-					m.send(msg.getFromAddress(), "");
-//					if (!msg.getToAddress().equals(getAddress()))
-//						forwardMessage(msg);
-					MessageWrapper sendBack = handleMessage(msg);
-					if (sendBack != null) {
-						do {
-							m.send(msg.getFromAddress(), JsonAuxiliary.messageWrapperToJson(sendBack));
-						} while (m.getNextMessage(100) == null);
-					}
-					
-					
-				}
-			} catch (Exception e) {
-				throw new IllegalStateException(e);
-			}
-		});
+		m_server = null;
 	}
 	
 	/**
@@ -77,25 +54,13 @@ public abstract class Server {
 		}
 	}
 	
-	public void forwardMessage(MessageWrapper msgWrap) throws MessengerException {
-		String ack = null;
-		while (ack == null) {
-			m_server.send(msgWrap.getToAddress(), JsonAuxiliary.messageWrapperToJson(msgWrap));
-			try {
-				ack = serverIncomingMessages.poll(100, TimeUnit.MILLISECONDS);
-			} catch (InterruptedException e) {
-				throw new MessengerException(e.getMessage());
-			}
-		}
-	}
-	
 	/**
 	 * Shut down the server.
 	 * 
 	 * @throws MessengerException
 	 *             In case there's a problem to killing the server messenger
 	 */
-	public void stopServer() throws MessengerException {
+	public void kill() throws MessengerException {
 		m_server.kill();
 	}
 	
@@ -114,4 +79,33 @@ public abstract class Server {
 	 * @return
 	 */
 	public abstract MessageWrapper handleMessage(MessageWrapper msgWrapper) throws MessengerException;
+
+	public void start() throws MessengerException {
+		if (m_server == null)
+			m_server = new MessengerFactory().start(getAddress(), (m, x) -> {
+				try {
+					System.out.println("Server received: " + x);
+					if (x.equals(""))
+						serverIncomingMessages.put(x);
+					else {
+						MessageWrapper msg = JsonAuxiliary.jsonToMessageWrapper(x);
+						System.out.println("Server sending ACK to client " + msg.getFromAddress());
+						m.send(msg.getFromAddress(), "");
+
+						MessageWrapper sendBack = handleMessage(msg);
+						if (sendBack != null) {
+							System.out.println("Server received: " + sendBack);
+							do {
+								m.send(sendBack.getToAddress(), JsonAuxiliary.messageWrapperToJson(sendBack));
+							} while (m.getNextMessage(100) == null);
+						}
+						
+						
+					}
+				} catch (Exception e) {
+					throw new IllegalStateException(e);
+				}
+			});
+    }
+
 }
