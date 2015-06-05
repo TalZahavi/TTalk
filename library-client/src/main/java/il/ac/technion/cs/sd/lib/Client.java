@@ -14,6 +14,7 @@ import il.ac.technion.cs.sd.msg.MessengerFactory;
  */
 public abstract class Client {
 	private String m_serverAddress;
+	private String m_clientAddress;
 	private Messenger m_client;
 	protected BlockingQueue<String> clientIncomingMessages;
 	protected BlockingQueue<String> clientIncomingACKs;
@@ -30,9 +31,13 @@ public abstract class Client {
 	 */
 	public Client(String address, String serverAddress) throws MessengerException {
 		m_serverAddress = serverAddress;
+		m_clientAddress = address;
 		clientIncomingMessages = new LinkedBlockingQueue<>();
 		clientIncomingACKs = new LinkedBlockingQueue<>();
-		m_client = new MessengerFactory().start(address, (m, x) -> {
+	}
+	
+	public void start() throws MessengerException {
+		m_client = new MessengerFactory().start(getClientAddress(), (m, x) -> {
 			try {
 				
 				System.out.println("Client " + m_client.getAddress() + " received: " + (x.equals("") ? "ACK" : x));
@@ -72,7 +77,7 @@ public abstract class Client {
 	 * @return The client address
 	 */
 	public String getClientAddress() {
-		return m_client.getAddress();
+		return m_clientAddress;
 	}
 	
 	/**

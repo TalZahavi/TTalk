@@ -1,10 +1,13 @@
 package il.ac.technion.cs.sd.lib;
 
+import java.io.Serializable;
+
 /**
  * Wrap the data of the message and add to it more information.
  */
-public class MessageWrapper {
+public class MessageWrapper implements Serializable{
 
+    private static final long serialVersionUID = -4434215640450204918L;
 	private String m_fromAddress;
 	private String m_toAddress;
 	private String m_msgData;
