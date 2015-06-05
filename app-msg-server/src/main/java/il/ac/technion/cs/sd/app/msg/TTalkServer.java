@@ -1,6 +1,5 @@
 package il.ac.technion.cs.sd.app.msg;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;

@@ -41,6 +41,7 @@ public class TTalkClient extends Client {
 		this.m_isLoggedIn = false;
 		try {
 			sendRequest(null, TTalkMessageType.LOGOUT.getValue());
+			stopClient();
 		} catch (MessengerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

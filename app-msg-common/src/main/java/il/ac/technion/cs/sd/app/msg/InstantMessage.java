@@ -11,7 +11,7 @@ public class InstantMessage {
 		this.to = to;
 		this.content = content;
 	}
-
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
