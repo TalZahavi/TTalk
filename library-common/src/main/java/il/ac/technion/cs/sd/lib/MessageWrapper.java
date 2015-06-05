@@ -5,6 +5,7 @@ import java.io.Serializable;
 /**
  * Wrap the data of the message and add to it more information.
  */
+<<<<<<< HEAD
 public class MessageWrapper implements Serializable {
 
 	private static final long serialVersionUID = -4434215640450204918L;
