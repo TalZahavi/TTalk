@@ -1,6 +1,6 @@
 package il.ac.technion.cs.sd.app.msg;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.Optional;
 import java.util.concurrent.*;
@@ -48,3 +48,4 @@ public class TMsgTest {
 		gal.logout();
 	}
 }
+

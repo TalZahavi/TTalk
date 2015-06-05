@@ -48,6 +48,10 @@ public class InstantMessage {
 			return false;
 		return true;
 	}
+
+	public String getContent() {
+	    return content;
+    }
 	
 	
 }

@@ -144,7 +144,7 @@ public class TTalkClient extends Client {
 				try {
 					List<MessageWrapper> msgList = JsonAuxiliary.jsonToMessageWrapperList(msgWrapper.getMessageData());
 					for (MessageWrapper m : msgList)
-						handleMessage(m);
+						$ = handleMessage(m);
 				} catch (ParseException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
