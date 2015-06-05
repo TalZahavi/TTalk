@@ -1,6 +1,5 @@
 package il.ac.technion.cs.sd.app.msg;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -57,7 +56,13 @@ public class TTalkServer extends Server {
 				m_outgoingMessages.get(from).clear();
 				break;
 			case FRIEND_REQUEST:
-				$ = new MessageWrapper(getAddress(), to, from, TTalkMessageType.FRIEND_REQUEST.getValue());
+				if (m_onlineUsers.contains(to))
+					$ = new MessageWrapper(getAddress(), to, from, TTalkMessageType.FRIEND_REQUEST.getValue());
+				else {
+					if (!m_outgoingMessages.containsKey(to))
+						m_outgoingMessages.put(to, new ArrayList<MessageWrapper>());
+					m_outgoingMessages.get(to).add(new MessageWrapper(getAddress(), to, from, TTalkMessageType.FRIEND_REQUEST.getValue()));
+				}
 				break;
 			case FRIEND_REQUEST_ACCEPT:
 				if (!m_friendsLists.containsKey(data))
