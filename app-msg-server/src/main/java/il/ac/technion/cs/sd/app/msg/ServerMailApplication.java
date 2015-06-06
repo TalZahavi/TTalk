@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import il.ac.technion.cs.sd.msg.MessengerException;
 
 
 /**
@@ -23,12 +22,7 @@ public class ServerMailApplication {
      */
 
 	public ServerMailApplication(String string) {
-		try {
-	        m_server = new TTalkServer(string);
-        } catch (MessengerException e) {
-	        // TODO Auto-generated catch block
-	        e.printStackTrace();
-        }
+		m_server = new TTalkServer(string);
 	}
 	
 	/**
@@ -43,24 +37,14 @@ public class ServerMailApplication {
 	 * This should be a <b>non-blocking</b> call.
 	 */
 	public void start() {
-		try {
-	        m_server.start();
-        } catch (MessengerException e) {
-	        // TODO Auto-generated catch block
-	        e.printStackTrace();
-        }
+	   m_server.start();
 	}
 	
 	/**
 	 * Stops the server. A stopped server can't accept messages, but doesn't delete any data (messages that weren't received).
 	 */
 	public void stop() {
-		try {
-	        m_server.kill();
-        } catch (MessengerException e) {
-	        // TODO Auto-generated catch block
-	        e.printStackTrace();
-        }
+	    m_server.kill();
 	}
 	
 	/**

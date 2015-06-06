@@ -22,12 +22,7 @@ public class ClientMsgApplication {
 	 * @param username The username that will be sending and accepting the messages using this object
 	 */
 	public ClientMsgApplication(String serverAddress, String username) {
-		try {
-	        m_client = new TTalkClient(username, serverAddress);
-        } catch (MessengerException e) {
-	        // TODO Auto-generated catch block
-	        e.printStackTrace();
-        }
+	   m_client = new TTalkClient(username, serverAddress);
 	}
 	
 	/**
@@ -68,8 +63,7 @@ public class ClientMsgApplication {
 		try {
 	        m_client.sendMessage(target, what, 0);
         } catch (MessengerException e) {
-	        // TODO Auto-generated catch block
-	        e.printStackTrace();
+        	throw new RuntimeException(e);
         }
 	}
 	
@@ -105,8 +99,7 @@ public class ClientMsgApplication {
         try {
 	        m_client.stopClient();
         } catch (MessengerException e) {
-	        // TODO Auto-generated catch block
-	        e.printStackTrace();
+        	throw new RuntimeException(e);
         }
     }
 

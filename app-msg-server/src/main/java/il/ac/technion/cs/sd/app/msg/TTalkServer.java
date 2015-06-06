@@ -1,7 +1,6 @@
 package il.ac.technion.cs.sd.app.msg;
 
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -16,21 +15,40 @@ import il.ac.technion.cs.sd.lib.JsonAuxiliary;
 import il.ac.technion.cs.sd.lib.MessageWrapper;
 import il.ac.technion.cs.sd.lib.Serializer;
 import il.ac.technion.cs.sd.lib.Server;
-import il.ac.technion.cs.sd.msg.MessengerException;
 
+/**
+ * 
+ * The TTalkServer represent a server in the TTalk application. <br>
+ * The Server will listen to the client requests and handle them according to the handle method
+ * (also send back a reply if needed).
+ */
 public class TTalkServer extends Server {
 	HashSet<String> m_onlineUsers;
 	HashMap<String, Set<String>> m_friendsLists;
 	HashMap<String, List<MessageWrapper>> m_outgoingMessages;
 	
-	public TTalkServer(String serverAddress) throws MessengerException {
+	
+	/**
+	 * Construct a new server in the TTalk application
+	 * @param serverAddress The server unique address
+	 */
+	public TTalkServer(String serverAddress) {
 		super(serverAddress);
 		m_onlineUsers = new HashSet<String>();
 		m_friendsLists = new HashMap<String, Set<String>>();
 		m_outgoingMessages = new HashMap<String, List<MessageWrapper>>();
 	}
 	
-	@Override public MessageWrapper handleMessage(MessageWrapper msgWrapper) throws MessengerException {
+	
+	/**
+	 * The method will get a messageWrapper object and handle it according to the message type.
+	 * <br>
+	 * In case there's no answer for that type of message - return null <br>
+	 * The server will send the message\request to the other client only if that client is online
+	 * (If not, the server will keep the message and send it when the client is online)
+	 */
+	@Override 
+	public MessageWrapper handleMessage(MessageWrapper msgWrapper) {
 		String from = msgWrapper.getFromAddress();
 		String to = msgWrapper.getToAddress();
 		String data = msgWrapper.getMessageData();
@@ -91,22 +109,41 @@ public class TTalkServer extends Server {
 		return $;
 	}
 	
-	@SuppressWarnings("unchecked") @Override public void start() throws MessengerException {
-		super.start();
-		// loadResources();
+	
+	/**
+	 * Start the server action (The server will start listen and handle client requests).
+	 * <br>
+	 * If there's previous data - the server will load it on start.
+	 */
+	@SuppressWarnings("unchecked")
+	@Override 
+	public void start() {
 		try {
+			super.start();
+			
+			// loadResources();
 			Path path = Paths.get("..\\app-msg-server\\src\\main\\resources\\" + getAddress() + "_fl");
 			byte[] data = Files.readAllBytes(path);
 			m_friendsLists = (HashMap<String, Set<String>>) Serializer.deserialize(data);
 			path = Paths.get("..\\app-msg-server\\src\\main\\resources\\" + getAddress() + "_om");
 			data = Files.readAllBytes(path);
 			m_outgoingMessages = (HashMap<String, List<MessageWrapper>>) Serializer.deserialize(data);
-		} catch (NoSuchFileException e) {
-		} catch (Exception e) {
+		}
+		catch (NoSuchFileException e){
+			//Do nothing - there's no data to load
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 	
-	@Override public void kill() throws MessengerException {
+	
+	/**
+	 * Stop the server action (the server will stop listening to clients).
+	 * If there's data on the server - it will be saved to an external file.
+	 */
+	@Override 
+	public void kill() {
 		// saveResources();
 		try {
 			FileOutputStream out = new FileOutputStream("..\\app-msg-server\\src\\main\\resources\\" + getAddress() + "_fl", false);
@@ -115,85 +152,11 @@ public class TTalkServer extends Server {
 			out = new FileOutputStream("..\\app-msg-server\\src\\main\\resources\\" + getAddress() + "_om", false);
 			out.write(Serializer.serialize(m_outgoingMessages));
 			out.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			super.kill();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
-		super.kill();
+		
 	}
-	// private void loadResources() {
-	// loadFriendsLists();
-	// loadOutgoingMessages();
-	// }
-	//
-	// private void loadFriendsLists() {
-	// JSONParser parser = new JSONParser();
-	// try {
-	// JSONArray jArray = (JSONArray) parser.parse(new FileReader("..\\app-msg-server\\src\\main\\resources\\" + getAddress()
-	// + "_fl"));
-	// for (Object o : jArray) {
-	// JSONObject $ = (JSONObject) o;
-	// $.get("user");
-	// }
-	// } catch (FileNotFoundException e) {
-	// e.printStackTrace();
-	// } catch (IOException e) {
-	// e.printStackTrace();
-	// } catch (ParseException e) {
-	// e.printStackTrace();
-	// }
-	// }
-	//
-	// private void loadOutgoingMessages() {
-	// // TODO Auto-generated method stub
-	// }
-	//
-	// private void saveResources() {
-	// saveFriendsLists();
-	// saveOutgoingMessages();
-	// }
-	//
-	// @SuppressWarnings({ "unchecked", "rawtypes" }) private void saveFriendsLists() {
-	// try {
-	// FileWriter file = new FileWriter("..\\app-msg-server\\src\\main\\resources\\" + getAddress() + "_fl");
-	// JSONArray jArray = new JSONArray();
-	// try {
-	// for (Entry<String, Set<String>> user : m_friendsLists.entrySet()) {
-	// JSONObject $ = new JSONObject();
-	// $.put("user", user.getKey());
-	// for (String friend : user.getValue()) {
-	// //$.get("user").put(user.getKey(), friend);
-	// jArray.add($);
-	// }
-	// }
-	// file.write(jArray.toJSONString());
-	// } catch (IOException e) {
-	// e.printStackTrace();
-	// } finally {
-	// file.flush();
-	// file.close();
-	// }
-	// } catch (IOException e) {
-	// e.printStackTrace();
-	// }
-	// }
-	//
-	// @SuppressWarnings("unchecked") private void saveOutgoingMessages() {
-	// try {
-	// FileWriter file = new FileWriter("..\\app-msg-server\\src\\main\\resources\\" + getAddress() + "_om");
-	// JSONArray jArray = new JSONArray();
-	// try {
-	// for (Entry<String, List<MessageWrapper>> user : m_outgoingMessages.entrySet())
-	// jArray.add(JsonAuxiliary.messageWrapperListToJson(user.getValue()));
-	// file.write(jArray.toJSONString());
-	// } catch (IOException e) {
-	// e.printStackTrace();
-	// } finally {
-	// file.flush();
-	// file.close();
-	// }
-	// } catch (IOException e) {
-	// e.printStackTrace();
-	// }
-	// }
 }

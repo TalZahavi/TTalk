@@ -2,8 +2,6 @@ package il.ac.technion.cs.sd.app.msg;
 
 /**
 * TTalkMessageType will represent the different messages types that the client can send the server
-* @author Boaz
-*
 */
 public enum TTalkMessageType {
 	SEND(0),
