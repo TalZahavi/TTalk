@@ -7,7 +7,7 @@ import java.util.concurrent.*;
 
 import org.junit.*;
 
-public class IsOnlineTest {
+public class FriendshipAndOnlineTest {
 	private ServerMailApplication			server				= new ServerMailApplication("Server");
 	// all listened to incoming messages will be written here
 	// a blocking queue is used to overcome threading issues
@@ -117,10 +117,25 @@ public class IsOnlineTest {
 		tal.logout();
 	}
 	
-	/*
-	 * Add here test that the client logged in for the FIRST TIME
-	 *  and he get SEVRAL friendship messages
-	 */
+	public void getMoreFriendshipRequestBeforeLogin() throws InterruptedException {
+		ClientMsgApplication tal = buildClient("Tal");
+		tal.login(x -> {}, x -> true, (x, y) -> friendshipReplies.add(y));
+		ClientMsgApplication boaz = buildClient("Boaz");
+		boaz.login(x -> {}, x -> true, (x, y) -> friendshipReplies.add(y));	
+		tal.requestFriendship("Ron");
+		boaz.requestFriendship("Ron");
+		ClientMsgApplication ron = buildClient("Ron");
+		ron.login(x -> {}, x -> true, (x, y) -> friendshipReplies.add(y));	
+		assertEquals(true, friendshipReplies.take());
+		assertEquals(true, friendshipReplies.take());
+		assertEquals(Optional.of(true), ron.isOnline("Boaz"));
+		assertEquals(Optional.of(true), ron.isOnline("Tal"));
+		ron.logout();
+		assertEquals(Optional.of(false), tal.isOnline("Ron"));
+		tal.logout();
+		boaz.logout();
+		
+	}
 	
 	@Test
 	public void getFriendshipRequestAfterReconnect() throws InterruptedException {
@@ -145,7 +160,4 @@ public class IsOnlineTest {
 	 * when he connect back - he will get the result
 	 */
 	
-	/**
-	 * Part of the tests here need to go to Friendship test
-	 */
 }

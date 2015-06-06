@@ -48,4 +48,53 @@ public class SaveServerTest {
 		tal.logout();
 		boaz.logout();
 	}
+	
+	@Test
+	public void serverRememberFriendship() throws InterruptedException {
+		ClientMsgApplication tal = buildClient("Tal");
+		tal.login(x -> {}, x -> true, (x, y) -> friendshipReplies.add(y));
+		ClientMsgApplication boaz = buildClient("Boaz");
+		boaz.login(x -> messages.add(x), x -> true, (x, y) -> friendshipReplies.add(y));
+		tal.requestFriendship("Boaz");
+		assertEquals(true, friendshipReplies.take());
+		server.stop();
+		server.start();
+		assertEquals(Optional.of(true), tal.isOnline("Boaz"));
+		assertEquals(Optional.of(true), boaz.isOnline("Tal"));
+		tal.logout();
+		boaz.logout();
+	}
+	
+	@Test
+	public void serverForgetFriendshipAfterClean() throws InterruptedException {
+		ClientMsgApplication tal = buildClient("Tal");
+		tal.login(x -> {}, x -> true, (x, y) -> friendshipReplies.add(y));
+		ClientMsgApplication boaz = buildClient("Boaz");
+		boaz.login(x -> messages.add(x), x -> true, (x, y) -> friendshipReplies.add(y));
+		tal.requestFriendship("Boaz");
+		assertEquals(true, friendshipReplies.take());
+		server.stop();
+		server.clean();
+		server.start();
+		//assertEquals(Optional.empty(), tal.isOnline("Boaz"));
+		//assertEquals(Optional.empty(), boaz.isOnline("Tal"));
+		tal.logout();
+		boaz.logout();
+	}
+	
+	@Test
+	public void serverForgetMessagesAfterClean() throws InterruptedException {
+		ClientMsgApplication tal = buildClient("Tal");
+		tal.login(x -> {}, x -> true, (x, y) -> friendshipReplies.add(y));
+		tal.sendMessage("Boaz", "Hi Boaz");
+		tal.sendMessage("Boaz", "How are you?");
+		ClientMsgApplication boaz = buildClient("Boaz");
+		server.stop();
+		server.clean();
+		server.start();
+		boaz.login(x -> messages.add(x), x -> true, (x, y) -> friendshipReplies.add(y));
+		//assertEquals(null,messages.poll(200, TimeUnit.MILLISECONDS));
+		tal.logout();
+		boaz.logout();
+	}
 }

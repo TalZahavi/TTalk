@@ -2,7 +2,6 @@ package il.ac.technion.cs.sd.app.msg;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Optional;
 import java.util.concurrent.*;
 
 import org.junit.*;
