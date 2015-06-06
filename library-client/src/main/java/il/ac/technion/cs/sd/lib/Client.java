@@ -10,7 +10,8 @@ import il.ac.technion.cs.sd.msg.MessengerFactory;
 
 /**
  * Represent a single client who is registered to a specific server. <br>
- * The client can request the server for data (using a message that will be send to the server).
+ * The client can request the server for different data (using a message that will be send to the server).
+ * The client is an abstract class - In order to use it the user have to implement the handleMessage method.
  */
 public abstract class Client {
 	private String m_serverAddress;
@@ -20,57 +21,59 @@ public abstract class Client {
 	protected BlockingQueue<String> clientIncomingACKs;
 	
 	/**
-	 * Construct a new client. The client have a unique address and will register to a specific server.
-	 * 
+	 * Construct a new client.
+	 * The client have a unique address and will register to a specific server.
 	 * @param address
-	 *            The address of the client
+	 *            The unique address of the client
 	 * @param serverAddress
-	 *            The address of the server
-	 * @throws MessengerException
-	 *             In case there's a problem to initialize the client messenger
+	 *            The address of the server (that the client will register to)
 	 */
-	public Client(String address, String serverAddress) throws MessengerException {
+	public Client(String address, String serverAddress) {
 		m_serverAddress = serverAddress;
 		m_clientAddress = address;
 		clientIncomingMessages = new LinkedBlockingQueue<>();
 		clientIncomingACKs = new LinkedBlockingQueue<>();
+		m_client = null;
 	}
 	
+	/**
+	 * Register the client to the server and start the listening\sending messages process.
+	 * <br>
+	 * The client can handle incoming messages (using the handleMessage method) and send the server
+	 * a result data in response (in case the handleMessage return actual data).
+	 * @throws MessengerException In case there's a problem in the initialization of the client messenger
+	 * @throws RuntimeException In case there's a problem sending the server the result
+	 * (or handle the incoming message)
+	 */
 	public void start() throws MessengerException {
-		m_client = new MessengerFactory().start(getClientAddress(), (m, x) -> {
-			try {
-				
-				System.out.println("Client " + m_client.getAddress() + " received: " + (x.equals("") ? "ACK" : x));
-				
-				if (x.equals(""))
-					clientIncomingACKs.put(x);
-				else {
-					System.out.println("Client " + m_client.getAddress() + " sending ACK to server");
-					m.send(m_serverAddress, "");
-					
-					MessageWrapper sendBack = handleMessage(JsonAuxiliary.jsonToMessageWrapper(x));
-					if (sendBack != null) {
-						System.out.println("Client " + m_client.getAddress() + " received: " + (sendBack.equals("") ? "ACK" : sendBack));
-						
-						do {
-							m.send(sendBack.getToAddress(), JsonAuxiliary.messageWrapperToJson(sendBack));
-						} while (m.getNextMessage(100) == null);
+		if (m_client == null)
+			m_client = new MessengerFactory().start(getClientAddress(), (m, x) -> {
+				try {	
+					if (x.equals(""))
+						clientIncomingACKs.put(x);
+					else {
+						m.send(m_serverAddress, "");		
+						MessageWrapper sendBack = handleMessage(JsonAuxiliary.jsonToMessageWrapper(x));
+						if (sendBack != null) {				
+							do {
+								m.send(sendBack.getToAddress(), JsonAuxiliary.messageWrapperToJson(sendBack));
+							} while (m.getNextMessage(100) == null);
+						}
 					}
+				} catch (Exception e) {
+					throw new RuntimeException(e);
 				}
-			} catch (Exception e) {
-				throw new IllegalStateException(e);
-			}
-		});
+			});
 	}
 	
 	/**
 	 * Shut down the client.
-	 * 
-	 * @throws MessengerException
-	 *             In case there's a problem to killing the client messenger
+	 * The client can't get or send any messages.
+	 * @throws MessengerException In case there's a problem to killing the client messenger
 	 */
 	public void stopClient() throws MessengerException {
 		m_client.kill();
+		m_client = null;
 	}
 	
 	/**
@@ -88,21 +91,16 @@ public abstract class Client {
 	}
 	
 	/**
-	 * Sends the server a MessageWrapper object in a reliable way and return the data that got back from the server in response. <br>
-	 * If there's no data to return from the server for that type of message - return null
-	 * 
-	 * @param toAddress
-	 * @param data
-	 *            The message data
-	 * @param type
-	 *            The message type
-	 * @return The respond from the server (In case there's none - return null)
-	 * @throws MessengerException
-	 *             In case there's a problem sending the server the message
-	 * @throws InterruptedException
-	 *             In case the client got interrupted in the process
+	 * Send the server a message in a safe way (the server will definitely get the message).
+	 * <br>
+	 * The message is for another client.
+	 * @param toAddress The address of the other client
+	 * @param data The data of the message
+	 * @param type The type of the message (you should use an enum)
+	 * @throws MessengerException In case there's a problem sending the message to the server 
+	 * (or someone interrupt the client while waiting for a confirmation from the server)
 	 */
-	public void sendMessage(String toAddress, String data, int type) throws MessengerException, InterruptedException {
+	public void sendMessage(String toAddress, String data, int type) throws MessengerException {
 		MessageWrapper msgWrap = new MessageWrapper(m_client.getAddress(), toAddress, data, type);
 		String jsonMsg = JsonAuxiliary.messageWrapperToJson(msgWrap);
 		String ack = null;
@@ -113,34 +111,57 @@ public abstract class Client {
 			} catch (InterruptedException e) {
 				throw new MessengerException(e.getMessage());
 			}
-			
-			System.out.println("ack is: " + ack);
-			
 		}
 	}
 	
-	public String sendMessageAndWaitForResult(String toAddress, String data, int type) throws MessengerException,
-	        InterruptedException {
+	/**
+	 * Same as sendMessage method, but in this case the client wait for result from the server.
+	 * You should not use this method if your message type don't need a result back
+	 * (The client will be blocked until a result came back)
+	 * @param toAddress The address of the other client
+	 * @param data The data of the message
+	 * @param type The type of the message (you should use an enum)
+	 * @return The result from the server
+	 * @throws MessengerException In case there's a problem sending the message to the server 
+	 * @throws InterruptedException In case someone interrupt the client while waiting for a result
+	 */
+	public String sendMessageAndWaitForResult(String toAddress, String data, int type) throws MessengerException, InterruptedException {
 		sendMessage(toAddress, data, type);
 		String $ = clientIncomingMessages.take();
-		System.out.println("Client " + getClientAddress()+ " checked queue and found: " + $);
 		return $;
 	}
 	
-	public void sendRequest(String data, int type) throws MessengerException, InterruptedException {
+	/**
+	 * Send the server a request in a safe way (the server will definitely get the request).
+	 * @param data The data of the request
+	 * @param type The type of the request
+	 * @throws MessengerException In case there's a problem sending the message to the server 
+	 * (or someone interrupt the client while waiting for a confirmation from the server)
+	 */
+	public void sendRequest(String data, int type) throws MessengerException {
 		sendMessage(getServerAddress(), data, type);
 	}
 	
+	/**
+	 * Same as sendRequest method, but in this case the client wait for result from the server.
+	 * You should not use this method if your request  don't need a result back.
+	 * @param data The data of the request
+	 * @param type The type of the request
+	 * @return The result from the server
+	 * @throws MessengerException In case there's a problem sending the request to the server
+	 * @throws InterruptedException In case someone interrupt the client while waiting for a result
+	 */
 	public String sendRequestAndWaitForResult(String data, int type) throws MessengerException, InterruptedException {
 		return sendMessageAndWaitForResult(getServerAddress(), data, type);
 	}
 	
 	/**
-	 * An abstract class for handling messages. <br>
+	 * An abstract class for handling messages.
+	 * <br>
 	 * In this method you should implement how the server handle each message type.
-	 * 
-	 * @param msgWrapper
-	 * @return Whether 
+	 * @param msgWrapper The messageWrapper object to handle
+	 * @return A result in a format of messageWrapper. If there's no result - you should return null!
+	 * @throws MessengerException
 	 */
 	public abstract MessageWrapper handleMessage(MessageWrapper msgWrapper) throws MessengerException;
 }

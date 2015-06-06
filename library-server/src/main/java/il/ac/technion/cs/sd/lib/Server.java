@@ -18,27 +18,27 @@ public abstract class Server {
 	private Messenger m_server;
 	private BlockingQueue<String> serverIncomingMessages;
 	
-	public Server(String serverAddress) throws MessengerException {
+	
+	/**
+	 * Represent a server that the clients will register to.
+	 * @param serverAddress The server unique address
+	 */
+	public Server(String serverAddress) {
 		m_address = serverAddress;
 		serverIncomingMessages = new LinkedBlockingQueue<>();
 		m_server = null;
 	}
 	
 	/**
-	 * Send the client a messageWrapper object. <br>
-	 * In this case, the message in not an answer to a request of the client. The server is the one who decide the send the message
-	 * first.
-	 * 
-	 * @param fromAddress
-	 *            In case the message is originally from some other client (and not the server)
-	 * @param toAddress
-	 *            The address of the client to send the message to
-	 * @param data
-	 *            The data of the message
-	 * @param type
-	 *            The type of the message
-	 * @throws MessengerException
-	 *             In case there's a problem sending the client the message
+	 * Send a client a messageWrapper object.
+	 * <br>
+	 * In this case, the message in not an answer to a request of the client - 
+	 * The server is the one who decide the send the message first.
+	 * @param fromAddress In case the message is originally from some other client (and not the server)
+	 * @param toAddress The address of the client to send the message to
+	 * @param data The data of the message
+	 * @param type The type of the message
+	 * @throws MessengerException In case there's a problem sending the client the message
 	 */
 	public void sendMessage(String toAddress, String data, int type) throws MessengerException {
 		MessageWrapper msgWrap = new MessageWrapper(getAddress(), toAddress, data, type);
@@ -56,9 +56,8 @@ public abstract class Server {
 	
 	/**
 	 * Shut down the server.
-	 * 
-	 * @throws MessengerException
-	 *             In case there's a problem to killing the server messenger
+	 * The server can't get or send any messages\requests.
+	 * @throws MessengerException In case there's a problem to killing the server messenger
 	 */
 	public void kill() throws MessengerException {
 		m_server.kill();
@@ -72,41 +71,46 @@ public abstract class Server {
 		return m_address;
 	}
 	
+	
 	/**
-	 * An abstract class for handling messages. <br>
-	 * In this method you should implement how the server handle each message type.
-	 * 
-	 * @param msgWrapper
-	 * @return
+	 * Start up the server - from now the clients get send messages\request to the server
+	 * (Also the server can send messages to the clients).
+	 * <br>
+	 * The server can handle incoming messages (using the handleMessage method) and send the client
+	 * a result data in response (in case the handleMessage return actual data).
+	 * @throws MessengerException In case there's a problem in the initialization of the server messenger
+	 * @throws RuntimeException In case there's a problem sending the client the result
+	 * (or handle the incoming message)
 	 */
-	public abstract MessageWrapper handleMessage(MessageWrapper msgWrapper) throws MessengerException;
-
 	public void start() throws MessengerException {
 		if (m_server == null)
 			m_server = new MessengerFactory().start(getAddress(), (m, x) -> {
 				try {
-					System.out.println("Server received: " + x);
 					if (x.equals(""))
 						serverIncomingMessages.put(x);
 					else {
 						MessageWrapper msg = JsonAuxiliary.jsonToMessageWrapper(x);
-						System.out.println("Server sending ACK to client " + msg.getFromAddress());
 						m.send(msg.getFromAddress(), "");
-
 						MessageWrapper sendBack = handleMessage(msg);
 						if (sendBack != null) {
-							System.out.println("Server received: " + sendBack);
 							do {
 								m.send(sendBack.getToAddress(), JsonAuxiliary.messageWrapperToJson(sendBack));
 							} while (m.getNextMessage(100) == null);
 						}
-						
-						
 					}
 				} catch (Exception e) {
-					throw new IllegalStateException(e);
+					throw new RuntimeException(e);
 				}
 			});
     }
-
+	
+	/**
+	 * An abstract class for handling messages.
+	 * <br>
+	 * In this method you should implement how the server handle each message type.
+	 * @param msgWrapper The messageWrppaer object to handle
+	 * @return A result in a format of messageWrapper. If there's no result - you should return null!
+	 * @throws MessengerException
+	 */
+	public abstract MessageWrapper handleMessage(MessageWrapper msgWrapper) throws MessengerException;
 }

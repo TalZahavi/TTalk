@@ -3,9 +3,9 @@ package il.ac.technion.cs.sd.lib;
 import java.io.Serializable;
 
 /**
- * Wrap the data of the message and add to it more information.
+ * MessageWrapper object wrap the message data (String)
+ * with more details - address of the sender\receiver and the type of the message 
  */
-<<<<<<< HEAD
 public class MessageWrapper implements Serializable {
 
 	private static final long serialVersionUID = -4434215640450204918L;
@@ -49,7 +49,7 @@ public class MessageWrapper implements Serializable {
 		return m_msgData;
 	}
 	
-	/**
+	/**In your implementation - you can define an enum with different messages types
 	 * @return An integer representing the message type
 	 */
 	public int getMessageType() {

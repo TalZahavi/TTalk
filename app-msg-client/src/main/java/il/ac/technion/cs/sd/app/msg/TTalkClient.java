@@ -32,9 +32,6 @@ public class TTalkClient extends Client {
 		} catch (MessengerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 	
@@ -44,9 +41,6 @@ public class TTalkClient extends Client {
 			sendRequest(null, TTalkMessageType.LOGOUT.getValue());
 			stopClient();
 		} catch (MessengerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -71,7 +65,7 @@ public class TTalkClient extends Client {
 	public void sendMessage(String to, String data) {
 		try {
 			sendMessage(to, data, TTalkMessageType.SEND.getValue());
-		} catch (MessengerException | InterruptedException e) {
+		} catch (MessengerException  e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -80,7 +74,7 @@ public class TTalkClient extends Client {
 	public void requestFriendship(String who) {
 		try {
 			sendMessage(who, null, TTalkMessageType.FRIEND_REQUEST.getValue());
-		} catch (MessengerException | InterruptedException e) {
+		} catch (MessengerException  e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

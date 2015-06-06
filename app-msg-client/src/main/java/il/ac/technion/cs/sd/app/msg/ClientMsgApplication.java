@@ -67,7 +67,7 @@ public class ClientMsgApplication {
 	public void sendMessage(String target, String what) {
 		try {
 	        m_client.sendMessage(target, what, 0);
-        } catch (MessengerException | InterruptedException e) {
+        } catch (MessengerException e) {
 	        // TODO Auto-generated catch block
 	        e.printStackTrace();
         }

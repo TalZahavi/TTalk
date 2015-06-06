@@ -13,13 +13,12 @@ import org.json.simple.parser.ParseException;
  */
 public class JsonAuxiliary {
 	/**
-	 * Get a message wrapper data and return a corresponding string in a JSON format
-	 * 
-	 * @param msgWrapper
-	 *            The messageWrapper to transfer to JSON
+	 * Get a messageWrapper object and return a corresponding string in a JSON format
+	 * @param msgWrapper The messageWrapper to transfer to JSON
 	 * @return A JSON string representing the message wrapper
 	 */
-	@SuppressWarnings("unchecked") public static String messageWrapperToJson(MessageWrapper msgWrapper) {
+	@SuppressWarnings("unchecked") 
+	public static String messageWrapperToJson(MessageWrapper msgWrapper) {
 		JSONObject $ = new JSONObject();
 		$.put("fromAddress", msgWrapper.getFromAddress());
 		$.put("toAddress", msgWrapper.getToAddress());
@@ -30,12 +29,9 @@ public class JsonAuxiliary {
 	
 	/**
 	 * Get a string in JSON format and return a corresponding messageWrapper object
-	 * 
-	 * @param jsonString
-	 *            The JSON string to transfer to a messageWrapper object
+	 * @param jsonString The JSON string to transfer to a messageWrapper object
 	 * @return A messageWrapper object representing the JSON string
-	 * @throws ParseException
-	 *             In case there's a problem with the parsing of the JSON string
+	 * @throws ParseException In case there's a problem with the parsing of the JSON string
 	 */
 	public static MessageWrapper jsonToMessageWrapper(String jsonString) throws ParseException {
 		JSONObject jsonObject = (JSONObject) JSONValue.parse(jsonString);
@@ -46,14 +42,27 @@ public class JsonAuxiliary {
 		return new MessageWrapper(fromAdr, toAdr, messageData, type);
 	}
 	
-	@SuppressWarnings("unchecked") public static String messageWrapperListToJson(List<MessageWrapper> l) {
+	/**
+	 * Get a list of messageWrapper objects and return a corresponding string in a JSON format for
+	 * all the objects
+	 * @param list The list of messageWrpper objects
+	 * @return A JSON string representing the message wrapper objects
+	 */
+	@SuppressWarnings("unchecked") 
+	public static String messageWrapperListToJson(List<MessageWrapper> list) {
 		JSONArray $ = new JSONArray();
-		for (MessageWrapper m : l) {
+		for (MessageWrapper m : list) {
 			$.add(messageWrapperToJson(m));
 		}
 		return $.toJSONString();
 	}
 	
+	/**
+	 * Get a string in JSON format and return a corresponding list of messageWrapper objects
+	 * @param s The JSON string to transfer to a list of  messageWrapper objects
+	 * @return A list of messageWrapper objects representing the JSON string
+	 * @throws ParseException In case there's a problem with the parsing of the JSON string
+	 */
 	public static List<MessageWrapper> jsonToMessageWrapperList(String s) throws ParseException {
 		JSONArray jArray = (JSONArray) JSONValue.parse(s);
 		List<MessageWrapper> $ = new ArrayList<MessageWrapper>(); 

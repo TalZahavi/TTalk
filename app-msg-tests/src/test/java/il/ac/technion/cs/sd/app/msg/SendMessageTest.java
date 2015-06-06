@@ -67,35 +67,35 @@ public class SendMessageTest {
 		boaz.logout();
 	}
 	
-//	@Test
-//	public void getMessageOnReconnect() throws InterruptedException {
-//		ClientMsgApplication tal = buildClient("Tal");
-//		tal.login(x -> {}, x -> true, (x, y) -> friendshipReplies.add(y));
-//		ClientMsgApplication boaz = buildClient("Boaz");
-//		boaz.login(x -> messages.add(x), x -> true, (x, y) -> friendshipReplies.add(y));
-//		boaz.logout();
-//		tal.sendMessage("Boaz", "And again");
-//		boaz.login(x -> messages.add(x), x -> true, (x, y) -> friendshipReplies.add(y));
-//		assertEquals(messages.take(), new InstantMessage("Tal", "Boaz", "And again"));
-//		tal.logout();
-//		boaz.logout();
-//	}
+	@Test
+	public void getMessageOnReconnect() throws InterruptedException {
+		ClientMsgApplication tal = buildClient("Tal");
+		tal.login(x -> {}, x -> true, (x, y) -> friendshipReplies.add(y));
+		ClientMsgApplication boaz = buildClient("Boaz");
+		boaz.login(x -> messages.add(x), x -> true, (x, y) -> friendshipReplies.add(y));
+		boaz.logout();
+		tal.sendMessage("Boaz", "And again");
+		boaz.login(x -> messages.add(x), x -> true, (x, y) -> friendshipReplies.add(y));
+		assertEquals(messages.take(), new InstantMessage("Tal", "Boaz", "And again"));
+		tal.logout();
+		boaz.logout();
+	}
 	
-//	@Test
-//	public void getMoreMessageOnReconnect() throws InterruptedException {
-//		ClientMsgApplication tal = buildClient("Tal");
-//		tal.login(x -> {}, x -> true, (x, y) -> friendshipReplies.add(y));
-//		ClientMsgApplication boaz = buildClient("Boaz");
-//		boaz.login(x -> messages.add(x), x -> true, (x, y) -> friendshipReplies.add(y));
-//		boaz.logout();
-//		tal.sendMessage("Boaz", "Hi there");
-//		tal.sendMessage("Boaz", "And again");
-//		boaz.login(x -> messages.add(x), x -> true, (x, y) -> friendshipReplies.add(y));
-//		assertEquals(messages.take(), new InstantMessage("Tal", "Boaz", "Hi there"));
-//		assertEquals(messages.take(), new InstantMessage("Tal", "Boaz", "And again"));
-//		tal.logout();
-//		boaz.logout();
-//	}
+	@Test
+	public void getMoreMessageOnReconnect() throws InterruptedException {
+		ClientMsgApplication tal = buildClient("Tal");
+		tal.login(x -> {}, x -> true, (x, y) -> friendshipReplies.add(y));
+		ClientMsgApplication boaz = buildClient("Boaz");
+		boaz.login(x -> messages.add(x), x -> true, (x, y) -> friendshipReplies.add(y));
+		boaz.logout();
+		tal.sendMessage("Boaz", "Hi there");
+		tal.sendMessage("Boaz", "And again");
+		boaz.login(x -> messages.add(x), x -> true, (x, y) -> friendshipReplies.add(y));
+		assertEquals(messages.take(), new InstantMessage("Tal", "Boaz", "Hi there"));
+		assertEquals(messages.take(), new InstantMessage("Tal", "Boaz", "And again"));
+		tal.logout();
+		boaz.logout();
+	}
 	
 	@Test
 	public void conversationBetweenClients() throws InterruptedException {

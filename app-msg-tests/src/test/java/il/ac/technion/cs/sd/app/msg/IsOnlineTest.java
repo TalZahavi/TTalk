@@ -103,41 +103,41 @@ public class IsOnlineTest {
 		tal.logout();
 	}
 	
-//	@Test
-//	public void getFriendshipRequesBeforeLoggin() throws InterruptedException {
-//		ClientMsgApplication tal = buildClient("Tal");
-//		tal.login(x -> {}, x -> true, (x, y) -> friendshipReplies.add(y));
-//		ClientMsgApplication boaz = buildClient("Boaz");
-//		tal.requestFriendship("Boaz");
-//		boaz.login(x -> {}, x -> true, (x, y) -> friendshipReplies.add(y));	
-//		assertEquals(true, friendshipReplies.take());
-//		assertEquals(Optional.of(true), tal.isOnline("Boaz"));
-//		assertEquals(Optional.of(true), boaz.isOnline("Tal"));
-//		boaz.logout();
-//		tal.logout();
-//	}
+	@Test
+	public void getFriendshipRequesBeforeLoggin() throws InterruptedException {
+		ClientMsgApplication tal = buildClient("Tal");
+		tal.login(x -> {}, x -> true, (x, y) -> friendshipReplies.add(y));
+		ClientMsgApplication boaz = buildClient("Boaz");
+		tal.requestFriendship("Boaz");
+		boaz.login(x -> {}, x -> true, (x, y) -> friendshipReplies.add(y));	
+		assertEquals(true, friendshipReplies.take());
+		assertEquals(Optional.of(true), tal.isOnline("Boaz"));
+		assertEquals(Optional.of(true), boaz.isOnline("Tal"));
+		boaz.logout();
+		tal.logout();
+	}
 	
 	/*
 	 * Add here test that the client logged in for the FIRST TIME
 	 *  and he get SEVRAL friendship messages
 	 */
 	
-//	@Test
-//	public void getFriendshipRequestAfterReconnect() throws InterruptedException {
-//		ClientMsgApplication tal = buildClient("Tal");
-//		tal.login(x -> {}, x -> true, (x, y) -> friendshipReplies.add(y));
-//		ClientMsgApplication boaz = buildClient("Boaz");
-//		boaz.login(x -> {}, x -> false, (x, y) -> friendshipReplies.add(y));
-//		
-//		boaz.logout();
-//		tal.requestFriendship("Boaz");
-//		boaz.login(x -> {}, x -> true, (x, y) -> friendshipReplies.add(y));
-//		assertEquals(true, friendshipReplies.take());
-//		assertEquals(Optional.of(true), tal.isOnline("Boaz"));
-//		assertEquals(Optional.of(true), boaz.isOnline("Tal"));
-//		boaz.logout();
-//		tal.logout();
-//	}
+	@Test
+	public void getFriendshipRequestAfterReconnect() throws InterruptedException {
+		ClientMsgApplication tal = buildClient("Tal");
+		tal.login(x -> {}, x -> true, (x, y) -> friendshipReplies.add(y));
+		ClientMsgApplication boaz = buildClient("Boaz");
+		boaz.login(x -> {}, x -> false, (x, y) -> friendshipReplies.add(y));
+		
+		boaz.logout();
+		tal.requestFriendship("Boaz");
+		boaz.login(x -> {}, x -> true, (x, y) -> friendshipReplies.add(y));
+		assertEquals(true, friendshipReplies.take());
+		assertEquals(Optional.of(true), tal.isOnline("Boaz"));
+		assertEquals(Optional.of(true), boaz.isOnline("Tal"));
+		boaz.logout();
+		tal.logout();
+	}
 	
 	/**
 	 * Add here test that the client who asked for friendship -

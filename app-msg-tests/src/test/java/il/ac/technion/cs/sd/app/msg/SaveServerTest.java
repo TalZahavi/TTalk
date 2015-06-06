@@ -36,12 +36,16 @@ public class SaveServerTest {
 		tal.sendMessage("Boaz", "Hi Boaz");
 		tal.sendMessage("Boaz", "How are you?");
 		ClientMsgApplication boaz = buildClient("Boaz");
+		tal.requestFriendship("Boaz");
 		server.stop();
 		server.start();
-		//boaz.login(x -> messages.add(x), x -> true, (x, y) -> friendshipReplies.add(y));
-		//assertEquals(messages.take(), new InstantMessage("Tal", "Boaz", "Hi Boaz"));
-		//assertEquals(messages.take(), new InstantMessage("Tal", "Boaz", "How are you?"));
+		boaz.login(x -> messages.add(x), x -> true, (x, y) -> friendshipReplies.add(y));
+		assertEquals(messages.take(), new InstantMessage("Tal", "Boaz", "Hi Boaz"));
+		assertEquals(messages.take(), new InstantMessage("Tal", "Boaz", "How are you?"));
+		assertEquals(true, friendshipReplies.take());
+		assertEquals(Optional.of(true), tal.isOnline("Boaz"));
+		assertEquals(Optional.of(true), boaz.isOnline("Tal"));
 		tal.logout();
-		//boaz.logout();
+		boaz.logout();
 	}
 }
