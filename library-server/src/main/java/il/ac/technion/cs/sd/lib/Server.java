@@ -62,6 +62,7 @@ public abstract class Server {
 	 */
 	public void kill() throws MessengerException {
 		m_server.kill();
+		m_server = null;
 	}
 	
 	/**
