@@ -118,23 +118,31 @@ public class TTalkServer extends Server {
 	@SuppressWarnings("unchecked")
 	@Override 
 	public void start() {
-		try {
+		try{
 			super.start();
-			
 			// loadResources();
 			Path path = Paths.get("..\\app-msg-server\\src\\main\\resources\\" + getAddress() + "_fl");
-			byte[] data = Files.readAllBytes(path);
-			m_friendsLists = (HashMap<String, Set<String>>) Serializer.deserialize(data);
+			byte[] data;
+			try {
+				data = Files.readAllBytes(path);
+				m_friendsLists = (HashMap<String, Set<String>>) Serializer.deserialize(data);
+			} catch (NoSuchFileException e) {
+				m_friendsLists.replaceAll((k, v) -> new HashSet<String>());
+			}
+			
+			
 			path = Paths.get("..\\app-msg-server\\src\\main\\resources\\" + getAddress() + "_om");
-			data = Files.readAllBytes(path);
-			m_outgoingMessages = (HashMap<String, List<MessageWrapper>>) Serializer.deserialize(data);
-		}
-		catch (NoSuchFileException e){
-			//Do nothing - there's no data to load
+			try {
+				data = Files.readAllBytes(path);
+				m_outgoingMessages = (HashMap<String, List<MessageWrapper>>) Serializer.deserialize(data);
+			} catch (NoSuchFileException e) {
+				m_outgoingMessages.clear();
+			}
 		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+		
 	}
 	
 	

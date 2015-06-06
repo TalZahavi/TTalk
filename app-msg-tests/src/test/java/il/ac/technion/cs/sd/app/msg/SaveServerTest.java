@@ -71,12 +71,13 @@ public class SaveServerTest {
 		tal.login(x -> {}, x -> true, (x, y) -> friendshipReplies.add(y));
 		ClientMsgApplication boaz = buildClient("Boaz");
 		boaz.login(x -> messages.add(x), x -> true, (x, y) -> friendshipReplies.add(y));
+		assertEquals(Optional.empty(), tal.isOnline("Boaz"));
 		tal.requestFriendship("Boaz");
 		assertEquals(true, friendshipReplies.take());
 		server.stop();
 		server.clean();
 		server.start();
-		//assertEquals(Optional.empty(), tal.isOnline("Boaz"));
+		assertEquals(Optional.empty(), tal.isOnline("Boaz"));
 		//assertEquals(Optional.empty(), boaz.isOnline("Tal"));
 		tal.logout();
 		boaz.logout();
@@ -93,7 +94,8 @@ public class SaveServerTest {
 		server.clean();
 		server.start();
 		boaz.login(x -> messages.add(x), x -> true, (x, y) -> friendshipReplies.add(y));
-		//assertEquals(null,messages.poll(200, TimeUnit.MILLISECONDS));
+		assertEquals(null,messages.poll(200, TimeUnit.MILLISECONDS));
+		assertEquals(true,messages.isEmpty());
 		tal.logout();
 		boaz.logout();
 	}
