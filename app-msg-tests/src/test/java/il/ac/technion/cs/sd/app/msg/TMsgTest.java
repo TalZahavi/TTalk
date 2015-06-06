@@ -33,12 +33,10 @@ public class TMsgTest {
 	public void basicTest() throws Exception {
 		ClientMsgApplication gal = buildClient("Gal");
 		gal.login(x -> {}, x -> true, (x, y) -> friendshipReplies.add(y));
-		System.out.println("***Gal LOGGED IN***");
 		assertEquals(Optional.empty(), gal.isOnline("Itay")); // Itay isn't a friend
 		gal.sendMessage("Itay", "Hi");
 		ClientMsgApplication itay = buildClient("Itay");
 		itay.login(x -> messages.add(x), x -> true, (x, y) -> {});
-		System.out.println("***Itay LOGGED IN***");
 		assertEquals(messages.take(), new InstantMessage("Gal", "Itay", "Hi")); // Itay received the message as soon as he logged in
 		gal.requestFriendship("Itay");
 		assertEquals(true, friendshipReplies.take()); // itay auto replies yes

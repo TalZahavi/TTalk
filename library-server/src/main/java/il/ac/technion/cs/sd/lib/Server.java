@@ -30,29 +30,48 @@ public abstract class Server {
 	}
 	
 	/**
-	 * Send a client a messageWrapper object.
-	 * <br>
-	 * In this case, the message in not an answer to a request of the client - 
-	 * The server is the one who decide the send the message first.
-	 * @param fromAddress In case the message is originally from some other client (and not the server)
-	 * @param toAddress The address of the client to send the message to
-	 * @param data The data of the message
-	 * @param type The type of the message
-	 * @throws MessengerException In case there's a problem sending the client the message
+	 * Represent a server that the clients will register to.
+	 * @param serverAddress The server unique address
+	 * @param server	The messenger that will be used for communication
 	 */
-	public void sendMessage(String toAddress, String data, int type) throws MessengerException {
-		MessageWrapper msgWrap = new MessageWrapper(getAddress(), toAddress, data, type);
-		String jsonMsg = JsonAuxiliary.messageWrapperToJson(msgWrap);
-		String ack = null;
-		while (ack == null) {
-			m_server.send(toAddress, jsonMsg);
-			try {
-				ack = serverIncomingMessages.poll(200, TimeUnit.MILLISECONDS);
-			} catch (InterruptedException e) {
-				throw new MessengerException(e.getMessage());
-			}
-		}
+	public Server(String serverAddress, Messenger server) {
+		this(serverAddress);
+		m_server = server;
 	}
+	
+	/**
+	 * Represent a server that the clients will register to.
+	 * @param serverAddress The server unique address
+	 * @param server	The messenger that will be used for communication
+	 */
+	public BlockingQueue<String> getServerIncomingMessages() {
+		return serverIncomingMessages;
+	}
+	
+//	/**
+//	 * Send a client a messageWrapper object.
+//	 * <br>
+//	 * In this case, the message in not an answer to a request of the client - 
+//	 * The server is the one who decide the send the message first.
+//	 * @param fromAddress In case the message is originally from some other client (and not the server)
+//	 * @param toAddress The address of the client to send the message to
+//	 * @param data The data of the message
+//	 * @param type The type of the message
+//	 * @throws MessengerException In case there's a problem sending the client the message
+//	 */
+//	public void sendMessage(String toAddress, String data, int type) throws MessengerException {
+//		MessageWrapper msgWrap = new MessageWrapper(getAddress(), toAddress, data, type);
+//		String jsonMsg = JsonAuxiliary.messageWrapperToJson(msgWrap);
+//		String ack = null;
+//		while (ack == null) {
+//			m_server.send(toAddress, jsonMsg);
+//			try {
+//				ack = serverIncomingMessages.poll(200, TimeUnit.MILLISECONDS);
+//			} catch (InterruptedException e) {
+//				throw new MessengerException(e.getMessage());
+//			}
+//		}
+//	}
 	
 	/**
 	 * Shut down the server.
