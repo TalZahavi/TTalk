@@ -17,7 +17,7 @@ public class Serializer {
 	 * Serialize the given object to an array of bytes
 	 * @param o The object to serialize
 	 * @return The object as an array of bytes
-	 * @throws IOException In case there was a problem in the process
+	 * @throws IOException In case there was a problem in the serialization process
 	 */
 	public static byte[] serialize(Object o) throws IOException  {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream() ;
@@ -50,7 +50,7 @@ public class Serializer {
 	 * Deserialize the given array to an object
 	 * @param byteData The array of bytes to deserialize
 	 * @return The object after the deserialize process
-	 * @throws IOException In case there was a problem in the process
+	 * @throws IOException In case there was a problem in the deserialize process
 	 */
 	public static Object deserialize(byte[] byteData) throws IOException  {
 		ByteArrayInputStream bis = new ByteArrayInputStream(byteData);
