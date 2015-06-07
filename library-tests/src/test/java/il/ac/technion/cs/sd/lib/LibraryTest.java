@@ -85,7 +85,7 @@ public class LibraryTest {
 	client.sendRequest("Hello", SimpleMessageTypes.REQUEST_DATA.getValue());
 				
 	//You need to Wait a little bit to make sure the data got sent
-	waitQueue.poll(100, TimeUnit.MILLISECONDS);
+	waitQueue.poll(200, TimeUnit.MILLISECONDS);
 	
 	//The server got the request
 	assertEquals("On",server.getRequestCounter());
@@ -106,7 +106,7 @@ public class LibraryTest {
 		client1.sendMessage("client2", "hi", SimpleMessageTypes.MESSAGE.getValue());
 					
 		//You need to Wait a little bit to make sure the data got sent
-		waitQueue.poll(100, TimeUnit.MILLISECONDS);
+		waitQueue.poll(200, TimeUnit.MILLISECONDS);
 		
 		//Client2 got the message that client1 sent him
 		assertEquals("On",client2.getMessagesCounter());

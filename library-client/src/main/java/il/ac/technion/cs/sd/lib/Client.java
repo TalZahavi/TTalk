@@ -77,20 +77,6 @@ public abstract class Client {
 	}
 	
 	/**
-	 * @return The client address
-	 */
-	public String getClientAddress() {
-		return m_clientAddress;
-	}
-	
-	/**
-	 * @return The address of the server that the client is registered to
-	 */
-	public String getServerAddress() {
-		return m_serverAddress;
-	}
-	
-	/**
 	 * Send the server a message in a safe way (the server will definitely get the message).
 	 * <br>
 	 * The message is for another client.
@@ -164,4 +150,18 @@ public abstract class Client {
 	 * @throws MessengerException
 	 */
 	public abstract MessageWrapper handleMessage(MessageWrapper msgWrapper) throws MessengerException;
+	
+	/**
+	 * @return The client address
+	 */
+	public String getClientAddress() {
+		return m_clientAddress;
+	}
+	
+	/**
+	 * @return The address of the server that the client is registered to
+	 */
+	public String getServerAddress() {
+		return m_serverAddress;
+	}
 }

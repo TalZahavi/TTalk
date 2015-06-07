@@ -154,10 +154,19 @@ public class FriendshipAndOnlineTest {
 		tal.logout();
 	}
 	
-	/**
-	 * Add here test that the client who asked for friendship -
-	 * will be offline and don't get the result message
-	 * when he connect back - he will get the result
-	 */
-	
+	@Test
+	public void getFriendshipAnswerOnLogging() throws InterruptedException {
+		ClientMsgApplication tal = buildClient("Tal");
+		tal.login(x -> {}, x -> true, (x, y) -> friendshipReplies.add(y));
+		tal.requestFriendship("Boaz");
+		tal.logout();
+		ClientMsgApplication boaz = buildClient("Boaz");
+		boaz.login(x -> {}, x -> true, (x, y) -> friendshipReplies.add(y));
+		tal.login(x -> {}, x -> true, (x, y) -> friendshipReplies.add(y));
+		assertEquals(true, friendshipReplies.take());
+		assertEquals(Optional.of(true), tal.isOnline("Boaz"));
+		assertEquals(Optional.of(true), boaz.isOnline("Tal"));
+		boaz.logout();
+		tal.logout();
+	}
 }
